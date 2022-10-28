@@ -1,7 +1,7 @@
 import React from "react";
 import UpdateShelf from './UpdateShelf'
 
-const Book = ({ getAll }) => {
+const Book = ({ getAll, update }) => {
   return (
     <ol className="books-grid">
       {getAll.map((e) => (
@@ -16,7 +16,7 @@ const Book = ({ getAll }) => {
                   backgroundImage: `url(${e.imageLinks.thumbnail})`,
                 }}
               ></div>
-                <UpdateShelf />
+                <UpdateShelf getAll={e} update={update} />
             </div>
             <div className="book-title">{e.title}</div>
             <div className="book-authors">{e.publisher}</div>

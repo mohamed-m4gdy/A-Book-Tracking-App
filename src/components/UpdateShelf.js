@@ -1,9 +1,10 @@
 import React from "react";
 
-const UpdateShelf = () => {
+const UpdateShelf = ({ getAll, update }) => {
+  
   return (
     <div className="book-shelf-changer">
-      <select>
+      <select defaultValue={getAll.shelf ? getAll.shelf : "none"} onChange={(e) => update(getAll, e.target.value)}>
         <option value="none" disabled>
           Move to...
         </option>
