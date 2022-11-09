@@ -1,92 +1,113 @@
 import "./App.css";
 import { useState, useEffect } from "react";
-import ListOfBooks from "./components/ListOfBooks";
+import { Route, Routes } from "react-router-dom";
 import * as BooksAPI from "./BooksAPI";
-import Result from "./components/Result";
+import Search from "./components/Search";
+import Page from "./components/Page";
 
 function App() {
-  const [showSearchPage, setShowSearchpage] = useState(false);
   // Get All Data
-  const [getAll, setGetAll] = useState([]);
+  const [getAlll, setGetAlll] = useState([]);
   // Search Data
   const [query, setQuery] = useState("");
   const [data, setData] = useState([]);
-  const [err, setErr] = useState([]);
-
-  // Search Data
-  useEffect(() => {
-    if (query.length > 0) {
-      BooksAPI.search(query).then((data) => {
-        if (data.error) {
-          setData([]);
-          setErr(data);
-        } else {
-          setData(data);
-          setErr([]);
-        }
-      });
-    } else {
-      setData([]);
-      setErr([]);
-    }
-  }, [query]);
-
-
-  // Update
-  const update = (book, shelf) => {
-    const updateBook = getAll.map(b => {
-      if (b.id === book.id) {
-        book.shelf = shelf;
-      }
-      return b;
-    })
-    BooksAPI.update(book, shelf).then(setGetAll(updateBook))
-  }
-
+  const [idOfBooks, setIdOfBooks] = useState(new Map());
+  const [merge, setMerge] = useState([]);
 
   // Get All Data
   useEffect(() => {
     BooksAPI.getAll().then((data) => {
-      setGetAll(data);
+      setGetAlll(data);
+      setIdOfBooks(cmob(data));
     });
   }, []);
+  // Update data
+  const update = (book, shelf) => {
+    const updateBook = getAlll.map((b) => {
+      if (b.id === book.id) {
+        book.shelf = shelf;
+        return book;
+      }
+      return b;
+    });
+    if (!idOfBooks.has(book.id)) {
+      book.shelf = shelf
+      updateBook.push(book)
+    }
+    setGetAlll(updateBook);
+    BooksAPI.update(book, shelf);
+  };
+
+  const cmob = (e) => {
+    const map = new Map();
+    e.map((d) => map.set(d.id, d));
+    return map;
+  };
+  useEffect(() => {
+    const merged = data.map((d) => {
+      if (idOfBooks.has(d.id)) {
+        return idOfBooks.get(d.id);
+      } else {
+        return d;
+      }
+    });
+    setMerge(merged);
+  }, [data]);
+
+  // Search Data
+  useEffect(() => {
+    let active = true;
+    if (query) {
+      BooksAPI.search(query).then((data) => {
+        if (data.error) {
+          setData([]);
+        } else {
+          if (active) {
+            setData(data);
+            console.log(data);
+          }
+        }
+      });
+    } else {
+      setData([]);
+    }
+    return () => {
+      active = false;
+      setData([]);
+    };
+  }, [query]);
+
   return (
     <div className="app">
-      {showSearchPage ? (
-        <div className="search-books">
-          <div className="search-books-bar">
-            <a
-              className="close-search"
-              onClick={() => setShowSearchpage(!showSearchPage)}
-            >
-              Close
-            </a>
-            <div className="search-books-input-wrapper">
-              <input
-                type="text"
-                placeholder="Search by title, author, or ISBN"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="search-books-results">
-            <Result data={data} err={err} update={update} getAll={getAll} />
-          </div>
-        </div>
-      ) : (
-        <div className="list-books">
-          <div className="list-books-title">
-            <h1>MyReads</h1>
-          </div>
-          <ListOfBooks getAll={getAll} update={update} />
-          <div className="open-search">
-            <a onClick={() => setShowSearchpage(!showSearchPage)}>Add a book</a>
-          </div>
-        </div>
-      )}
+      <Routes>
+        <Route
+          path="/search"
+          element={
+            <Search
+              query={query}
+              setQuery={setQuery}
+              merge={merge}
+              update={update}
+              getAll={getAlll}
+            />
+          }
+        />
+        <Route
+          exact
+          path="/"
+          element={
+            <Page
+              query={query}
+              setQuery={setQuery}
+              merge={merge}
+              update={update}
+              getAll={getAlll}
+            />
+          }
+        />
+      </Routes>
     </div>
   );
 }
-
+// <Result data={data} err={err} update={update} getAll={getAlll} />
 export default App;
