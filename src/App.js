@@ -52,7 +52,7 @@ function App() {
       }
     });
     setMerge(merged);
-  }, [data]);
+  }, [data, idOfBooks]);
 
   // Search Data
   useEffect(() => {
