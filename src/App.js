@@ -7,7 +7,7 @@ import Page from "./components/Page";
 
 function App() {
   // Get All Data
-  const [getAlll, setGetAlll] = useState([]);
+  const [books, setBooks] = useState([]);
   // Search Data
   const [query, setQuery] = useState("");
   const [data, setData] = useState([]);
@@ -17,13 +17,13 @@ function App() {
   // Get All Data
   useEffect(() => {
     BooksAPI.getAll().then((data) => {
-      setGetAlll(data);
+      setBooks(data);
       setIdOfBooks(cmob(data));
     });
   }, []);
   // Update data
   const update = (book, shelf) => {
-    const updateBook = getAlll.map((b) => {
+    const updateBook = books.map((b) => {
       if (b.id === book.id) {
         book.shelf = shelf;
         return book;
@@ -34,7 +34,7 @@ function App() {
       book.shelf = shelf
       updateBook.push(book)
     }
-    setGetAlll(updateBook);
+    setBooks(updateBook);
     BooksAPI.update(book, shelf);
   };
 
@@ -88,7 +88,7 @@ function App() {
               setQuery={setQuery}
               merge={merge}
               update={update}
-              getAll={getAlll}
+              getAll={books}
             />
           }
         />
@@ -101,7 +101,7 @@ function App() {
               setQuery={setQuery}
               merge={merge}
               update={update}
-              getAll={getAlll}
+              getAll={books}
             />
           }
         />
@@ -109,5 +109,5 @@ function App() {
     </div>
   );
 }
-// <Result data={data} err={err} update={update} getAll={getAlll} />
+// <Result data={data} err={err} update={update} getAll={books} />
 export default App;
